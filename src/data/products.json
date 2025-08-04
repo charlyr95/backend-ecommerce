@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "title": "Puma",
+    "description": "Puma Skyrocket Lite Adp",
+    "code": "746a2d5fb2",
+    "price": 23999,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": ["1230557-400-400", "1230558-400-400"]
+  },
+  {
+    "id": 2,
+    "title": "Puma",
+    "description": "Puma Skyrocket Lite Adp",
+    "code": "746a2d5fb2",
+    "price": 23999,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": ["1230557-400-400", "1230558-400-400"]
+  },
+  {
+    "id": 3,
+    "title": "Puma",
+    "description": "Puma Skyrocket Lite Adp",
+    "code": "746a2d5fb2",
+    "price": 23999,
+    "status": true,
+    "stock": 19,
+    "category": "calzado",
+    "thumbnails": ["1230557-400-400", "1230558-400-400"]
+  },
+  {
+    "id": 4,
+    "title": "Puma",
+    "description": "Puma Skyrocket Lite Adp",
+    "code": "",
+    "price": 23999,
+    "status": false,
+    "stock": 0,
+    "category": "no category",
+    "thumbnails": []
+  }
+]
