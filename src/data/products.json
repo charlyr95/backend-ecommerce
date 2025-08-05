@@ -31,16 +31,5 @@
     "stock": 19,
     "category": "calzado",
     "thumbnails": ["1230557-400-400", "1230558-400-400"]
-  },
-  {
-    "id": 4,
-    "title": "Puma",
-    "description": "Puma Skyrocket Lite Adp",
-    "code": "",
-    "price": 23999,
-    "status": false,
-    "stock": 0,
-    "category": "no category",
-    "thumbnails": []
   }
 ]

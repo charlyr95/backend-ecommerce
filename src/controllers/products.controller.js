@@ -24,7 +24,7 @@ class ProductsController {
       }
       return product;
     } catch (error) {
-      throw new Error("Error getting product by ID:", error);
+      throw new Error(error);
     }
   }
 
@@ -36,7 +36,7 @@ class ProductsController {
       products.push(product);
       await fs.promises.writeFile(this.path, JSON.stringify(products));
     } catch (error) {
-      throw new Error("Error adding product:", error);
+      throw new Error(error);
     }
   }
 
@@ -51,7 +51,7 @@ class ProductsController {
       products[index] = new Product({ ...products[index], ...updatedFields });
       await fs.promises.writeFile(this.path, JSON.stringify(products));
     } catch (error) {
-      throw new Error("Error updating product:", error);
+      throw new Error(error);
     }
   }
 
@@ -65,7 +65,7 @@ class ProductsController {
       products.splice(index, 1);
       await fs.promises.writeFile(this.path, JSON.stringify(products));
     } catch (error) {
-      throw new Error("Error deleting product:", error);
+      throw new Error(error);
     }
   }
 }

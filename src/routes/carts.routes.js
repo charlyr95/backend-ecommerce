@@ -12,15 +12,16 @@ router.get("/:cid", async (req, res) => {
   res.status(200).json(cart);
 });
 
+
 router.post("/:cid/product/:pid", async (req, res) => {
   const { cid, pid } = req.params;
-  let quantity = 1;
-  if (!req.body) quantity = 1; 
-  else if (req.body.quantity) quantity = req.body.quantity; 
-  else quantity = 1;
-  const product = { id: parseInt(pid), quantity: quantity };
-  await cartsController.addProduct(cid, product);
-  res.status(200).json(`Added ${quantity} Product id ${pid} to cart id ${cid}`);
+  await cartsController.addProduct(cid, pid);
+  res.status(200).json(`Added Product id ${pid} to cart id ${cid}`);
 });
+
+// router.get("/", async (req, res) => {
+//   const cart = await cartsController.getCarts();
+//   res.status(200).json(cart);
+// });
 
 module.exports = router;

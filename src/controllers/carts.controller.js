@@ -1,4 +1,5 @@
 const fs = require("fs");
+const productsController = require("./products.controller.js");
 
 class CartsController {
   constructor(path) {
@@ -24,9 +25,7 @@ class CartsController {
       const newId = carts.length > 0 ? carts[carts.length - 1].id + 1 : 1;
       const newCart = {
         id: newId,
-        products: products
-          .filter((p) => p.id != null)
-          .map((p) => ({ id: p.id, quantity: p.quantity || 1 })),
+        products: [],
       };
       carts.push(newCart);
       await fs.promises.writeFile(this.path, JSON.stringify(carts));
@@ -35,19 +34,23 @@ class CartsController {
     }
   }
 
-  async addProduct(id, product) {
+  async addProduct(cart_id, product_id) {
     try {
       const carts = await this.getCarts();
-      const cart = carts.find((c) => c.id === parseInt(id));
-      if (!cart) {
-        console.log(cart);
-        throw new Error(`Cart with id ${id} not found`);
-      }
-      const existingProduct = cart.products.find((p) => p.id === product.id);
+      if (!carts) throw new Error(`Carts not found`);
+
+      const cart = carts.find((c) => c.id === parseInt(cart_id));
+      if (!cart) throw new Error(`Cart with id ${cart_id} not found`);
+
+      const product = await productsController.getProductById(product_id);
+      console.log(product);
+      if (!product) throw new Error(`Product with id ${product_id} not found`);
+      
+      const existingProduct = cart.products.find((p) => p.product === product.id);
       if (existingProduct) {
-        existingProduct.quantity += product.quantity || 1;
+        existingProduct.quantity += 1;
       } else {
-        cart.products.push({ id: product.id, quantity: product.quantity || 1 });
+        cart.products.push({ product: product.id, quantity: 1 });
       }
       await fs.promises.writeFile(this.path, JSON.stringify(carts));
     } catch (error) {
