@@ -5,7 +5,11 @@ class ProductsController {
   constructor(path) {
     this.path = path;
   }
-  
+
+  async writeFile(products) {
+    await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
+  }
+
   async getProducts() {
     if (fs.existsSync(this.path)) {
       const products = await fs.promises.readFile(this.path, "utf-8");
@@ -31,10 +35,11 @@ class ProductsController {
   async addProduct(product) {
     try {
       const products = await this.getProducts();
-      const newId = products.length > 0 ? products[products.length - 1].id + 1 : 1;
+      const newId =
+        products.length > 0 ? products[products.length - 1].id + 1 : 1;
       product = new Product({ ...product, id: newId });
       products.push(product);
-      await fs.promises.writeFile(this.path, JSON.stringify(products));
+      await this.writeFile(products);
     } catch (error) {
       throw new Error(error);
     }
@@ -49,7 +54,7 @@ class ProductsController {
         throw new Error(`Product with id ${id} not found`);
       }
       products[index] = new Product({ ...products[index], ...updatedFields });
-      await fs.promises.writeFile(this.path, JSON.stringify(products));
+      await this.writeFile(products);
     } catch (error) {
       throw new Error(error);
     }
@@ -63,7 +68,7 @@ class ProductsController {
         throw new Error(`Product with id ${id} not found`);
       }
       products.splice(index, 1);
-      await fs.promises.writeFile(this.path, JSON.stringify(products));
+      await this.writeFile(products);
     } catch (error) {
       throw new Error(error);
     }
@@ -71,13 +76,3 @@ class ProductsController {
 }
 
 module.exports = new ProductsController("./src/data/products.json");
-
-// id: Number/String (No se manda desde el body, se autogenera para asegurar que nunca se repitan los ids).
-// title: String
-// description: String
-// code: String
-// price: Number
-// status: Boolean
-// stock: Number
-// category: String
-// thumbnails: Array de Strings

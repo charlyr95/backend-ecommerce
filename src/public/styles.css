@@ -1,0 +1,16 @@
+/* Simple CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    line-height: 1.5;
+    height: 100%;
+    font-family: sans-serif;
+}
+
+tr {
+    vertical-align: middle;
+}

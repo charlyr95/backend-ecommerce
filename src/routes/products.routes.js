@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const productsController = require("../controllers/products.controller");
 
-
 router.get("/", async (req, res) => {
   const products = await productsController.getProducts();
   res.status(200).json(products);
@@ -12,9 +11,9 @@ router.get("/:pid", async (req, res) => {
   res.status(200).json(product);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const product = req.body;
-  productsController.addProduct(product);
+  await productsController.addProduct(product);
   res.status(201).send("Product added");
 });
 
