@@ -1,13 +1,13 @@
 <h1 class="text-center mt-5">Productos</h1>
 <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
   {{#each products}}
-    <div class="card shadow-sm bg-body-tertiary ">
-      <div class="card-header m-0 p-1 bg-white">
+    <div class="card shadow-sm bg-body-tertiary" style="width: 200px;">
+      <div class="card-header m-0 p-1 bg-white" style="height: 200px;">
         <img
           src="{{this.thumbnails.[0]}}"
           alt="{{this.title}}"
           class="img-fluid"
-          style="height: 200px; object-fit: fill;"
+          style="height: 100%; object-fit: cover;"
         />
       </div>
       <div class="card-body bg-body-tertiary m-2 p-2">
