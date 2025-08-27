@@ -14,7 +14,8 @@ const sendToast = (message, type = "success") => {
 document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(document.querySelector("form")));
-
+  data.thumbnails = [data.thumbnails]; // Wrap thumbnails in an array
+  
   await fetch("/api/products", {
     method: "POST",
     headers: {

@@ -40,5 +40,18 @@
       "https://www.dexter.com.ar/on/demandware.static/-/Sites-365-dabra-catalog/default/dw8a1dd7c9/products/RE_H02993/RE_H02993-1.JPG",
       "1230558-400-400"
     ]
+  },
+  {
+    "id": 4,
+    "title": "Adidas",
+    "description": "Adidas Vl Court 3.0",
+    "code": "7a120af268",
+    "price": 69990,
+    "status": true,
+    "stock": 15,
+    "category": "calzado",
+    "thumbnails": [
+      "https://production.cdn.vaypol.com/variants/f49330pv89nbyq7or41iq55btmj0/e82c8d6171dd25bb538f2e7263b5bc7dfc6a79352d85923074be76df53fbc6f4"
+    ]
   }
 ]
