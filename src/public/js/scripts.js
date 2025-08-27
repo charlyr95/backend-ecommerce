@@ -43,9 +43,10 @@ deleteProduct = async (id) => {
     .then((response) => {
       if (!response.ok) {
         sendToast("❌ Error al eliminar producto", "red");
+      } else {
+        socket.emit("update:products");
+        sendToast("✔️ Producto eliminado!");
       }
-      socket.emit("update:products");
-      sendToast("✔️ Producto eliminado!");
     })
     .catch((error) => {
       sendToast("❌ Error al eliminar producto", "red");
