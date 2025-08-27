@@ -28,10 +28,10 @@ document.querySelector("form").addEventListener("submit", async (e) => {
       }
       socket.emit("update:products");
       document.querySelector("form").reset();
-      sendToast("✔️ Producto añadido!");
+      sendToast("Producto añadido!");
     })
     .catch((error) => {
-      sendToast("❌ Error al añadir producto", "red");
+      sendToast("Error al añadir producto", "red");
     });
 });
 
@@ -42,14 +42,14 @@ deleteProduct = async (id) => {
   })
     .then((response) => {
       if (!response.ok) {
-        sendToast("❌ Error al eliminar producto", "red");
+        sendToast("Error al eliminar producto", "red");
       } else {
         socket.emit("update:products");
-        sendToast("✔️ Producto eliminado!");
+        sendToast("Producto eliminado!");
       }
     })
     .catch((error) => {
-      sendToast("❌ Error al eliminar producto", "red");
+      sendToast("Error al eliminar producto", "red");
     });
 };
 
