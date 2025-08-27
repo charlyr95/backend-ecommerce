@@ -1,0 +1,22 @@
+<h1 class="text-center mt-5">Productos</h1>
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+  {{#each products}}
+    <div class="card shadow-sm bg-body-tertiary ">
+      <div class="card-header m-0 p-1 bg-white">
+        <img
+          src="{{this.thumbnails.[0]}}"
+          alt="{{this.title}}"
+          class="img-fluid"
+          style="height: 200px; object-fit: fill;"
+        />
+      </div>
+      <div class="card-body bg-body-tertiary m-2 p-2">
+        <h2 class="fs-5">{{this.title}}</h2>
+        <p class="fw-lighter mb-1" style="font-size: 0.9em;">{{this.description}}</p>
+        <p class="fw-bolder" style="font-size: 0.9em;">${{this.price}}</p>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<script src="/scripts.js"></script>

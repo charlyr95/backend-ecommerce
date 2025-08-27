@@ -62,3 +62,4 @@ socket.on("products", (products) => {
     .join(" ");
   productContainer.innerHTML = productRender;
 });
+
