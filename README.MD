@@ -2,12 +2,6 @@
 
 Un backend sencillo en Node.js para una plataforma de comercio electrónico. Este proyecto proporciona APIs RESTful para gestionar productos y carritos de compras, y sirve vistas dinámicas usando Handlebars.
 
-## Features
-
-# Backend Ecommerce
-
-Un backend sencillo en Node.js para una plataforma de comercio electrónico. Este proyecto proporciona APIs RESTful para gestionar productos y carritos de compras, y sirve vistas dinámicas usando Handlebars.
-
 ## Características
 - Gestión de productos (CRUD)
 - Gestión de carritos (CRUD)
