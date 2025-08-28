@@ -1,9 +1,21 @@
 const socket = io();
 
+const sendToast = (message, type = "success") => {
+  Toastify({
+    text: message,
+    duration: 2000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    backgroundColor: type === "success" ? "green" : "red",
+  }).showToast();
+};
+
 document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(document.querySelector("form")));
-
+  data.thumbnails = [data.thumbnails]; // Wrap thumbnails in an array
+  
   await fetch("/api/products", {
     method: "POST",
     headers: {
@@ -17,10 +29,10 @@ document.querySelector("form").addEventListener("submit", async (e) => {
       }
       socket.emit("update:products");
       document.querySelector("form").reset();
-      alert("Product added successfully");
+      sendToast("Producto añadido!");
     })
     .catch((error) => {
-      console.error("Error adding product:", error);
+      sendToast("Error al añadir producto", "red");
     });
 });
 
@@ -31,13 +43,14 @@ deleteProduct = async (id) => {
   })
     .then((response) => {
       if (!response.ok) {
-        console.error("Network response was not ok");
+        sendToast("Error al eliminar producto", "red");
+      } else {
+        socket.emit("update:products");
+        sendToast("Producto eliminado!");
       }
-      socket.emit("update:products");
-      alert("Product deleted successfully");
     })
     .catch((error) => {
-      console.error("Error deleting product:", error);
+      sendToast("Error al eliminar producto", "red");
     });
 };
 
@@ -62,3 +75,4 @@ socket.on("products", (products) => {
     .join(" ");
   productContainer.innerHTML = productRender;
 });
+
