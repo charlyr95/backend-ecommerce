@@ -24,3 +24,6 @@ logs
 
 # Environment variables
 .env*
+
+# Test coverage directory
+_tests/

@@ -1,78 +1,78 @@
-const fs = require("fs");
-const Product = require("../models/products.model");
-
+const ProductDao = require("../daos/products.dao");
 class ProductsController {
-  constructor(path) {
-    this.path = path;
+  constructor(dao) {
+    this.dao = dao;
   }
 
-  async writeFile(products) {
-    await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
-  }
-
-  async getProducts() {
-    if (fs.existsSync(this.path)) {
-      const products = await fs.promises.readFile(this.path, "utf-8");
-      if (products.length === 0) return []; // Si el archivo está vacío, retornar un array vacío
-      return JSON.parse(products);
-    }
-    return [];
-  }
-
-  async getProductById(id) {
+  getProducts = async (req, res, next) => {
     try {
-      const products = await this.getProducts();
-      const product = products.find((p) => p.id === parseInt(id));
-      if (!product) {
-        throw new Error(`Product with id ${id} not found`);
-      }
-      return product;
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+      const { limit = 10, page = 1, sort, query } = req.query;
 
-  async addProduct(product) {
-    try {
-      const products = await this.getProducts();
-      const newId =
-        products.length > 0 ? products[products.length - 1].id + 1 : 1;
-      product = new Product({ ...product, id: newId });
-      products.push(product);
-      await this.writeFile(products);
+      const result = await this.dao.getProducts({
+        limit: parseInt(limit),
+        page: parseInt(page),
+        sort,
+        query
+      });
+
+      const { products, total, totalPages } = result;
+      const hasPrevPage = result.page > 1;
+      const hasNextPage = result.page < totalPages;
+
+      const response = {
+        status: "success",
+        payload: products,
+        totalPages,
+        prevPage: hasPrevPage ? result.page - 1 : null,
+        nextPage: hasNextPage ? result.page + 1 : null,
+        page: result.page,
+        hasPrevPage,
+        hasNextPage,
+        prevLink: hasPrevPage ? `/api/products?page=${result.page - 1}&limit=${limit}` : null,
+        nextLink: hasNextPage ? `/api/products?page=${result.page + 1}&limit=${limit}` : null
+      };
+
+      res.status(200).json(response);
     } catch (error) {
-      throw new Error(error);
+      next(error);
     }
   }
 
-  async updateProduct(id, updatedFields) {
+  getProductById = async (req, res, next) => {
     try {
-      delete updatedFields.id; // Asegurarse de que no se pueda cambiar el id
-      const products = await this.getProducts();
-      const index = products.findIndex((p) => p.id === parseInt(id));
-      if (index === -1) {
-        throw new Error(`Product with id ${id} not found`);
-      }
-      products[index] = new Product({ ...products[index], ...updatedFields });
-      await this.writeFile(products);
+      const product = await this.dao.getProductById(req.params.pid);
+      res.status(200).json(product);
     } catch (error) {
-      throw new Error(error);
+      next(error);
     }
   }
 
-  async deleteProduct(id) {
+  addProduct = async (req, res, next) => {
     try {
-      const products = await this.getProducts();
-      const index = products.findIndex((p) => p.id === parseInt(id));
-      if (index === -1) {
-        throw new Error(`Product with id ${id} not found`);
-      }
-      products.splice(index, 1);
-      await this.writeFile(products);
+      const newProduct = await this.dao.addProduct(req.body);
+      res.status(201).json(newProduct);
     } catch (error) {
-      throw new Error(error);
+      next(error);
+    }
+  }
+
+  updateProduct = async (req, res, next) => {
+    try {
+      const updatedProduct = await this.dao.updateProduct(req.params.pid, req.body);
+      res.status(200).json(updatedProduct);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  deleteProduct = async (req, res, next) => {
+    try {
+      await this.dao.deleteProduct(req.params.pid);
+      res.status(204).send("Product deleted");
+    } catch (error) {
+      next(error);
     }
   }
 }
 
-module.exports = new ProductsController("./src/data/products.json");
+module.exports = new ProductsController(ProductDao);

@@ -1,71 +1,101 @@
-const fs = require("fs");
-const productsController = require("./products.controller.js");
+const CartDao = require("../daos/carts.dao");
 
 class CartsController {
-  constructor(path) {
-    this.path = path;
+  constructor(dao) {
+    this.dao = dao;
   }
 
-  async getCartById(id) {
+  getCarts = async (req, res, next) => {
     try {
-      const carts = await this.getCarts();
-      const cart = carts.find((c) => c.id === parseInt(id));
-      if (!cart) {
-        throw new Error(`Cart with id ${id} not found`);
-      }
-      return cart;
+      const carts = await this.dao.getCarts();
+      res.status(200).json(carts);
     } catch (error) {
-      throw new Error(error);
+      next(error);
     }
   }
 
-  async addCart(products) {
+  getCartById = async (req, res, next) => {
     try {
-      const carts = await this.getCarts();
-      const newId = carts.length > 0 ? carts[carts.length - 1].id + 1 : 1;
-      const newCart = {
-        id: newId,
-        products: [],
-      };
-      carts.push(newCart);
-      await fs.promises.writeFile(this.path, JSON.stringify(carts));
+      const cart = await this.dao.getCartById(req.params.cid);
+      if (!cart) return res.status(404).send({ error: "Carrito no encontrado" });
+      res.send(cart);
     } catch (error) {
-      throw new Error(error);
+      next(error);
     }
   }
 
-  async addProduct(cart_id, product_id) {
+  addCart = async (req, res, next) => {
     try {
-      const carts = await this.getCarts();
-      if (!carts) throw new Error(`Carts not found`);
-
-      const cart = carts.find((c) => c.id === parseInt(cart_id));
-      if (!cart) throw new Error(`Cart with id ${cart_id} not found`);
-
-      const product = await productsController.getProductById(product_id);
-      console.log(product);
-      if (!product) throw new Error(`Product with id ${product_id} not found`);
-      
-      const existingProduct = cart.products.find((p) => p.product === product.id);
-      if (existingProduct) {
-        existingProduct.quantity += 1;
-      } else {
-        cart.products.push({ product: product.id, quantity: 1 });
-      }
-      await fs.promises.writeFile(this.path, JSON.stringify(carts));
+      const carts = await this.dao.addCart();
+      res.status(201).json(carts);
     } catch (error) {
-      throw new Error(error);
+      next(error);
     }
   }
 
-  async getCarts() {
-    if (fs.existsSync(this.path)) {
-      const carts = await fs.promises.readFile(this.path, "utf-8");
-      if (carts.length === 0) return [];
-      return JSON.parse(carts);
+  addProduct = async (req, res, next) => {
+    try {
+      const { cid, pid } = req.params;
+      await this.dao.addProductToCart(cid, pid);
+      res.status(200).json({ message: `Producto ${pid} agregado al carrito ${cid}` });
+    } catch (error) {
+      next(error);
     }
-    return [];
   }
+
+  deleteCart = async (req, res, next) => {
+    try {
+      const { cid } = req.params;
+      await this.dao.deleteCart(cid);
+      res.status(200).json({ message: `Carrito ${cid} eliminado` });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // TODO: Eliminar esto ---------------------- NUEVO ----------------------
+  updateCartProducts = async (req, res, next) => {
+    try {
+      const { cid } = req.params;
+      const { products } = req.body;
+      await this.dao.updateCartProducts(cid, products);
+      res.status(200).json({ message: `Carrito ${cid} productos actualizados` });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  updateProductQuantity = async (req, res, next) => {
+    try {
+      const { cid, pid } = req.params;
+      const { quantity } = req.body;
+      await this.dao.updateProductQuantity(cid, pid, quantity);
+      res.status(200).json({ message: `Producto ${pid} cantidad actualizada en carrito ${cid}` });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  deleteProduct = async (req, res, next) => {
+    try {
+      const { cid, pid } = req.params;
+      await this.dao.deleteProduct(cid, pid);
+      res.status(200).json({ message: `Producto ${pid} eliminado del carrito ${cid}` });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  clearCart = async (req, res, next) => {
+    try {
+      const { cid } = req.params;
+      await this.dao.clearCart(cid);
+      res.status(200).json({ message: `Carrito ${cid} vaciado` });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
-module.exports = new CartsController("./src/data/carts.json");
+module.exports = new CartsController(CartDao);

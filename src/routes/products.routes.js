@@ -1,30 +1,10 @@
 const router = require("express").Router();
-const productsController = require("../controllers/products.controller");
+const controller = require("../controllers/products.controller");
 
-router.get("/", async (req, res) => {
-  const products = await productsController.getProducts();
-  res.status(200).json(products);
-});
+router.get("/", controller.getProducts);
+router.post("/", controller.addProduct);
+router.get("/:pid", controller.getProductById);
+router.put("/:pid", controller.updateProduct);
+router.delete("/:pid", controller.deleteProduct);
 
-router.get("/:pid", async (req, res) => {
-  const product = await productsController.getProductById(req.params.pid);
-  res.status(200).json(product);
-});
-
-router.post("/", async (req, res) => {
-  const product = req.body;
-  await productsController.addProduct(product);
-  res.status(201).send("Product added");
-});
-
-router.put("/:pid", async (req, res) => {
-  const updatedProduct = await productsController.updateProduct(req.params.pid, req.body);
-  res.status(200).send("Product updated");
-});
-
-router.delete("/:pid", async (req, res) => {
-  await productsController.deleteProduct(req.params.pid);
-  res.status(204).send("Product deleted");
-});
-  
 module.exports = router;

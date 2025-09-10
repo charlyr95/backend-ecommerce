@@ -1,5 +1,4 @@
-const socket = io();
-
+// easy message function with Toastify
 const sendToast = (message, type = "success") => {
   Toastify({
     text: message,
@@ -7,72 +6,87 @@ const sendToast = (message, type = "success") => {
     close: true,
     gravity: "top",
     position: "right",
-    backgroundColor: type === "success" ? "green" : "red",
+    style: {
+      background: type === "success" ? "green" : "red",
+    },
   }).showToast();
 };
 
-document.querySelector("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(document.querySelector("form")));
-  data.thumbnails = [data.thumbnails]; // Wrap thumbnails in an array
-  
-  await fetch("/api/products", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        console.error("Network response was not ok");
-      }
-      socket.emit("update:products");
-      document.querySelector("form").reset();
-      sendToast("Producto añadido!");
-    })
-    .catch((error) => {
-      sendToast("Error al añadir producto", "red");
-    });
-});
-
-
-deleteProduct = async (id) => {
-  await fetch(`/api/products/${id}`, {
-    method: "DELETE",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        sendToast("Error al eliminar producto", "red");
-      } else {
-        socket.emit("update:products");
-        sendToast("Producto eliminado!");
-      }
-    })
-    .catch((error) => {
-      sendToast("Error al eliminar producto", "red");
-    });
+// main function to add a product to the cart
+async function addToCart(pid) {
+  await getCart().then(cart => {
+    addProductToCart(cart._id, pid);
+  }).catch(error => {
+    sendToast("Error al obtener el carrito", "red");
+  });
 };
 
 
-socket.on("products", (products) => {
-  const productContainer = document.getElementById("productsContainer");
-  const productRender = products
-    .map((product) => {
-      return `<tr>
-        <td>${product.id}</td>
-        <td>${product.title}</td>
-        <td>${product.code}</td>
-        <td>${product.description}</td>
-        <td>$${product.price.toLocaleString("es-AR")}</td>
-        <td>${product.stock}</td>
-        <td>${product.status}</td>
-        <td>${product.category}</td>
-        <td><img class="img-thumbnail" style="width: 50px; height: 50px;" src="${product.thumbnails[0]}" onerror="this.onerror=null; this.src='no-image.jpg'" alt="${product.title}" /></td>
-        <td><button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${product.id})">Eliminar</button></td>
-      </tr>`;
-    })
-    .join(" ");
-  productContainer.innerHTML = productRender;
-});
+async function addProductToCart(cid, pid) {
+  try {
+    const response = await fetch(`/api/carts/${cid}/product/${pid}`, {
+      method: "POST",
+    });
 
+    if (!response.ok) {
+      sendToast("Error al agregar producto al carrito", "red");
+    } else {
+      sendToast("Producto agregado al carrito!");
+    }
+  } catch (error) {
+    sendToast("Error al agregar producto al carrito", "red");
+  }
+}
+
+
+
+// Intenta obtener el carrito del localStorage, verifica con la db y sino crea uno nuevo
+async function getCart() {
+  try {
+    const cart = await loadCartFromLocalStorage();
+    if (!cart) return createNewCart();
+    const validate = await getCartById(cart._id);
+    if (!validate) return createNewCart();
+    return validate;
+  } catch (error) {
+    return null;
+  }
+}
+
+// get cart from localstorage
+async function loadCartFromLocalStorage() {
+  const cart = localStorage.getItem("cart");
+  if (!cart) return null;
+  const parsedCart = JSON.parse(cart);
+  return parsedCart;
+}
+
+// create a new cart in the database
+async function createNewCart() {
+  try {
+    const response = await fetch("/api/carts", { method: "POST" });
+    if (!response.ok) return null;
+    const cart = await response.json();
+    await saveCart(cart);
+    return cart;
+  } catch (error) {
+    return null;
+  }
+}
+
+// save to localStorage
+async function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+// check cart from database by id
+async function getCartById(id) {
+  try {
+    const response = await fetch(`/api/carts/${id}`);
+    if (!response.ok) return null;
+    const cart = await response.json();
+    return cart;
+  } catch (error) {
+    return null;
+  }
+};
