@@ -6,7 +6,7 @@ class ProductsController {
 
   getProducts = async (req, res, next) => {
     try {
-      const { limit = 10, page = 1, sort, query } = req.query;
+      const { limit = 10, page = 1, sort, query = {} } = req.query;
 
       const result = await this.dao.getProducts({
         limit: parseInt(limit),

@@ -1,0 +1,166 @@
+<h1 class="text-center mt-5">Carrito de Compras</h1>
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+  <div id="loaderContainer" class="w-100 d-flex justify-content-center align-items-center mb-3" style="min-height: 40vh;">
+    <div class="spinner-border fs-5 text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  </div>
+  <div id="cartContainer" class="container text-center">
+    <div>
+      <ul class="list-group" id="cartList" style="max-width: 600px; margin: 0 auto;">
+        <!-- Aquí se agregarán los productos del carrito dinámicamente -->
+
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  
+  // Inicializar el carrito al cargar la página
+  function initCart(){
+    getCart().then(cart => {
+      if (cart) {
+        removeLoader();
+        renderData(cart);
+      } else {
+        removeLoader();
+        const div = document.getElementById('cartList');
+        div.innerHTML = `
+          <p>No hay un carrito activo. Por favor, agrega productos al carrito.</p>
+          <div class="mb-3">
+            <a href="/products" class="btn btn-primary">Ir a Productos</a>
+          </div>
+        `;
+        console.error('Error al obtener el carrito');
+      }
+    });
+  }
+  
+  initCart();
+
+  // Eliminar el spinner de carga
+  function removeLoader(){
+    const loader = document.getElementById('loaderContainer');
+    if (loader) {
+      loader.remove();
+    }
+  }
+
+  // Intenta obtener el carrito del localStorage, verifica con la db y sino crea uno nuevo
+  async function getCart() {
+    try {
+      const cart = await loadCartFromLocalStorage();
+      if (!cart) return null;
+      const validate = await getCartById(cart._id);
+      if (!validate) return null;
+      return validate;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // get cart from localstorage
+  async function loadCartFromLocalStorage() {
+    const cart = localStorage.getItem("cart");
+    if (!cart) return null;
+    const parsedCart = JSON.parse(cart);
+    return parsedCart;
+  }
+
+  // save to localStorage
+  async function saveCart(cart) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
+
+  // check cart from database by id
+  async function getCartById(id) {
+    try {
+      const response = await fetch(`/api/carts/${id}`);
+      if (!response.ok) return null;
+      const cart = await response.json();
+      return cart;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Refresca el carrito obteniendo los datos más recientes
+  async function deleteProductFromCart(cartId, productId) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Producto eliminado del carrito:', result);
+        initCart();
+      } else {
+        console.error('Error al eliminar el producto del carrito');
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error);
+    }
+  }
+
+  // Limpiar todo el carrito
+  async function clearCart(cartId) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/products`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Carrito limpiado:', result);
+        initCart();
+      } else {
+        console.error('Error al limpiar el carrito');
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error);
+    }
+  }
+
+  // Mostrar el carrito actualizado
+  function renderData(data){
+    //data: { _id, products: [{product, quantity}] }
+    const cartContainer = document.getElementById('cartList');
+    if (data && data.products && data.products.length > 0) {
+      cartContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar productos
+      data.products.forEach(item => {
+        const product = item.product;
+        const quantity = item.quantity;
+        const productListItem = document.createElement('div');
+        productListItem.className = 'text-start';
+        productListItem.innerHTML = `
+        <li class="list-group-item d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <img src="${product.thumbnails[0]}" alt="${product.title}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+            <div>
+              <h6 class="mb-1">${product.title}</h6>
+              <small class="text-muted">${product.code}</small>
+              <p class="mb-0">${product.description}</p>
+            </div>
+          </div>
+          <div class="text-end d-flex flex-row align-items-center gap-4">
+          <div>
+            <span class="fw-light">Precio: $${product.price}</span><br>
+            <span>Cantidad: ${quantity}</span><br>
+            <span>Stock: ${product.stock}</span>
+          </div>
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteProductFromCart('${data._id}', '${product._id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </li>
+        `;
+        cartContainer.appendChild(productListItem);
+      });
+    } else {
+      cartContainer.innerHTML = '<p>El carrito está vacío.</p>';
+    }
+  }
+  
+</script>

@@ -13,8 +13,8 @@ const sendToast = (message, type = "success") => {
 };
 
 // main function to add a product to the cart
-async function addToCart(pid) {
-  await getCart().then(cart => {
+function addToCart(pid) {
+  getCart().then(cart => {
     addProductToCart(cart._id, pid);
   }).catch(error => {
     sendToast("Error al obtener el carrito", "red");

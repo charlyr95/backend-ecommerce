@@ -5,9 +5,14 @@ class ProductsDao {
     this.model = model;
   }
 
-  async getProducts({ limit = 10, page = 1, sort, query } = {}) {
+  async getProducts({ limit = 10, page = 1, sort, query} = {}) {
     try {
-      const filter = query ? { category: query } : {};
+      // expected filter: {"category":"calzado","price":{"$gte":45000}}
+      if (query && typeof query === "string") {
+        query = JSON.parse(query);
+      }
+      const filter = query ? { ...query } : {};
+
       const sortOption = sort ? { price: sort === "asc" ? 1 : -1 } : {};
       const skip = (page - 1) * limit;
 
