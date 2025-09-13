@@ -2,204 +2,140 @@
 
 <div id="productContainer" class="">
 
-  {{!-- limit --}}
-  <div class="d-flex flex-column gap-2 justify-content-center my-3">
-    <div class="input-group container text-center justify-content-center">
-      <span for="limitSelect" class="input-group-text">Limitar a:</span>
-      <select id="limitSelect" class="form-select" style="max-width: fit-content;" onchange="loadProducts(1, this.value)">
-        <option value="5">5</option>
-        <option value="10" selected>10</option>
-        <option value="20">20</option>
-        <option value="30">30</option>
-      </select>
-    </div>
 
-    {{!-- search --}}
-    <div class="container" style="max-width: 800px; margin: 0 auto;">
-      <div class="input-group mb-2" >
-        <span class="input-group-text">Titulo</span>
-        <input id="titleSearch" type="text" class="form-control" placeholder="Puma" aria-label="Title">
-        <span class="input-group-text">Descripción</span>
-        <input id="descriptionSearch" type="text" class="form-control" placeholder="Rocket" aria-label="Description">
-        <span class="input-group-text">Categoría</span>
-        <input id="categorySearch" type="text" class="form-control" placeholder="Calzado" aria-label="Category">
-      </div>
-      <div class="input-group mb-2">
-        <span class="input-group-text">Precio mínimo:</span>
-        <input id="minPriceSearch" type="number" class="form-control" aria-label="Price" step="1000" min="0">
-        <span class="input-group-text">Precio máximo:</span>
-        <input id="maxPriceSearch" type="number" class="form-control" aria-label="Price" step="1000" min="1000">
-        <span class="input-group-text">Orden:</span>
-        <select id="sortSelect" class="form-select" style="max-width: fit-content;" onchange="loadProducts(1, this.value)">
-          <option value="" selected>-</option>
-          <option value="asc">Menor a mayor</option>
-          <option value="desc">Mayor a menor</option>
-        </select>
-      </div>
-      <button button class="btn btn-primary w-100" onclick="loadProducts()">Buscar</button>
-    </div>
-  </div>
 
-  {{!-- paginate --}}
-  <nav id="paginationNav" aria-label="Page navigation">
-    
-  </nav>
-
-  {{!-- products --}}
-  <div id="productList" class="d-flex flex-wrap justify-content-center gap-3 mt-4 mb-5 pb-5">
-
-  </div>
 </div>
 
 
 <script>
-  loadProducts();
+  // Función para cargar productos con paginación
+  // get product id from url /products/:id
+  const urlParts = window.location.pathname.split('/');
+  const productId = urlParts[urlParts.length - 1];
+  loadProductID(productId);
 
   // Cargar y mostrar los productos al cargar la página
-  async function loadProducts(page = 1, limit = 10) {
-    limit = document.getElementById('limitSelect').value || limit;
-
-    const title = document.getElementById('titleSearch').value;
-    const description = document.getElementById('descriptionSearch').value;
-    const category = document.getElementById('categorySearch').value;
-    const minPrice = document.getElementById('minPriceSearch').value;
-    const maxPrice = document.getElementById('maxPriceSearch').value;
-    const sort = document.getElementById('sortSelect').value || '';
-
-    // Construcción del filtro dinámico
-    const filter = {};
-
-    if (title) {
-      filter.title = { $regex: title, $options: "i" };
-    }
-
-    if (description) {
-      filter.description = { $regex: description, $options: "i" };
-    }
-
-    if (category) {
-      filter.category = { $regex: category, $options: "i" };
-    }
-
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseFloat(minPrice);
-      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
-    }
-
-    // Query enviado para filtrar el backend
-    const query = filter ? JSON.stringify(filter) : '{}';
-
+  async function loadProductID(id) {
     try {
-      const response = await fetch(`/api/products?page=${page}&limit=${limit}&query=${query}&sort=${sort}`);
+      const response = await fetch(`/api/products/${id}`);
       if (!response.ok) {
-        throw new Error('Error al obtener los productos');
+        throw new Error('Error al obtener el producto');
       }
-      const products = await response.json();
-      renderProducts(products);
+      const product = await response.json();
+      renderProduct(product);
     } catch (error) {
-      console.error('Error al cargar los productos:', error);
+      console.error('Error al cargar el producto:', error);
       const container = document.getElementById('productContainer');
-      container.innerHTML = '<p class="fs-4 text-center">Error al cargar los productos.</p>';
+      container.innerHTML = '<p class="fs-4 text-center">Error al cargar el producto.</p>';
     }
   }
 
 
 
   // Renderizar los productos en el contenedor
-  function renderProducts(products) {
+  function renderProduct(product) {
     /*
     {
-      "status": "success",
-      "payload": [
-        {
-          "_id": "64a7f0f4e1f1c8b1f4e5d6a1",
-          "title": "Producto 1",
-          "description": "Descripción del producto 1",
-          "price": 100,
-          "thumbnails": ["https://via.placeholder.com/150"],
-          "code": "P001",
-          "stock": 10,
-          "category": "Categoría A",
-          "status": true,
-          "createdAt": "2023-07-03T12:00:00.000Z",
-          "updatedAt": "2023-07-03T12:00:00.000Z",
-          "__v": 0
-        },
-        // Más productos...
+      "_id": "68c3828c912bc80ffdc2cb0a",
+      "title": "Nike",
+      "description": "Nike Dunk Low Retro",
+      "code": "code0007",
+      "price": 40500,
+      "status": true,
+      "stock": 17,
+      "category": "calzado",
+      "thumbnails": [
+          "https://example.com/images/nike_7.jpg"
       ],
-      "totalPages": 5,
-      "prevPage": null,
-      "nextPage": 2,
-      "page": 1,
-      "hasPrevPage": false,
-      "hasNextPage": true,
-      "prevLink": null,
-      "nextLink": "/api/products?page=2&limit=10"
-    }
+      "__v": 0
+    } 
     */
 
-    if (!products || !products.payload) {
-      const container = document.getElementById('productContainer');
+    const container = document.getElementById('productContainer');
+    
+    if (!product) {
       container.innerHTML = '<p class="fs-4 text-center">No hay productos disponibles.</p>';
       return;
     }
 
-    const paginationNav = document.getElementById('paginationNav');
-    paginationNav.innerHTML = '';
-    paginationNav.innerHTML = `
-    <ul class="pagination justify-content-center">
-      <li class="page-item">
-        <button class="page-link" aria-label="Previous" onclick="loadProducts(${products.prevPage})" ${products.hasPrevPage == true ? '' : 'disabled=true'}>
-          <span aria-hidden="true">&laquo;</span>
-        </button>
-      </li>
-      <li class="page-item">
-        <span class="page-link">${products.page} / ${products.totalPages}</span>
-      </li>
-      <li class="page-item">
-        <button class="page-link" aria-label="Next" onclick="loadProducts(${products.nextPage})" ${products.hasNextPage == true ? '' : 'disabled=true'}>
-          <span aria-hidden="true">&raquo;</span>
-        </button>
-      </li>
-    </ul>
-    `
-
-
-    const productsContainer = document.getElementById('productList');
-    productsContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevos productos
-
-    products.payload.forEach(product => {
-      const productCard = document.createElement('div');
-      productCard.className = 'card shadow-sm bg-body-tertiary';
-      productCard.style.width = '200px';
-      productCard.innerHTML = `
-          <div class="card-header m-0 p-1 bg-white" style="height: 200px;">
-              <img
-                src="${product.thumbnails[0]}"
-                alt="${product.title}"
-                class="img-fluid"
-                style="height: 100%; object-fit: cover;"
-              />
-            </div>
-            <div class="card-body bg-body-tertiary m-2 p-2 mb-0">
-              <h2 class="fs-5">${product.title}</h2>
-              <p class="fw-lighter mb-1" style="font-size: 0.8em;">${product.description}</p>
-              <p class="fw-bolder mb-0" style="font-size: 0.9em;">$${product.price}</p>
-            </div>
-            <div class="card-footer text-center">
-              <div class="btn-group">
-                <button class="btn btn-outline-dark btn-sm">Ver detalle</button>
-                <button class="btn btn-outline-primary btn-sm" onclick="addToCart('${product._id}')" aria-label="Agregar al carrito">
-                  <i class="bi bi-cart-plus"></i>
-                </button>
+    container.innerHTML = '';
+    const productsContainer = document.getElementById('productContainer');
+    productsContainer.className = '';
+    const productCard = document.createElement('div');
+    productCard.innerHTML = `
+          <div class="container my-5">
+            <div class="row">
+              <div class="col-md-6">
+                <div
+                  class="card card-image-container position-relative overflow-hidden"
+                >
+                  <img
+                    class="card-img-top main-image"
+                    alt="${product.title}"
+                    src="${product.thumbnails[0]}"
+                  />
+                </div>
+              </div>
+              <div class="col-md-6 mt-5 mt-md-0 d-flex flex-column gap-2">
+                <h5>${product.title}</h5>
+                <h3>${product.description}</h3>
+                <div class="text-muted">
+                  <ul class="list-unstyled">
+                    <li><span class="text-dark-emphasis fw-bold">$${product.price}</span></li>
+                    <li>
+                      6 cuotas de: <span class="text-dark-emphasis">$${(product.price / 6).toFixed(2)}</span>
+                    </li>
+                    <li>
+                      <span class="text-dark-emphasis fw-bold">$${(product.price * 0.85).toFixed(2)}</span>
+                      <small class="text-muted">con Transferencia</small>
+                    </li>
+                  </ul>
+                </div>
+                <p class="d-none"></p>
+                <div class="d-flex flex-column gap-3 p-3 border rounded">
+                  <div
+                    class="d-flex justify-content-center align-items-center gap-3 flex-wrap"
+                  >
+                    <h5 class="text-center m-0 p-0 d-none">Cantidad</h5>
+                    <div
+                      class="btn-group d-flex justify-content-center align-items-center d-none"
+                    >
+                      <button class="btn btn-outline-secondary px-3 py-2 fs-5">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <div
+                        class="px-4 py-2 border border-secondary border-end-0 border-start-0 bg-white fs-5 text-center"
+                        style="min-width: 60px"
+                      >
+                        1
+                      </div>
+                      <button class="btn btn-outline-secondary px-3 py-2 fs-5">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                    <small class="m-0 p-0 text-muted text-center">${product.stock} disponibles</small>
+                  </div>
+                  <button class="btn btn-warning py-2" onclick="addToCart('${product._id}')" aria-label="Agregar al carrito">Agregar al carrito</button>
+                </div>
+                <div class="card" style="font-size: 0.8em">
+                  <ul class="list-unstyled p-3">
+                    <li>Precio Exclusivo Online</li>
+                    <li>El precio puede variar en nuestras tiendas físicas:</li>
+                    <li>
+                      - Tendrás atención personalizada por profesionales especializado
+                    </li>
+                    <li>
+                      - Ganas la oportunidad de ver, tocar y probar en físico multitud
+                      de productos
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-      `;
 
-      productsContainer.appendChild(productCard);
-    });
+    `;
+    productsContainer.appendChild(productCard);
   }
 
   

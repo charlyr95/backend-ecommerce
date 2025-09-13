@@ -189,7 +189,7 @@
             </div>
             <div class="card-footer text-center">
               <div class="btn-group">
-                <button class="btn btn-outline-dark btn-sm">Ver detalle</button>
+                <button class="btn btn-outline-dark btn-sm" onclick="viewProduct('${product._id}')">Ver detalle</button>
                 <button class="btn btn-outline-primary btn-sm" onclick="addToCart('${product._id}')" aria-label="Agregar al carrito">
                   <i class="bi bi-cart-plus"></i>
                 </button>
@@ -200,6 +200,10 @@
 
       productsContainer.appendChild(productCard);
     });
+  }
+
+  function viewProduct(id) {
+    window.location.href = `/products/${id}`;
   }
 
   
